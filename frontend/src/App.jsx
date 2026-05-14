@@ -71,6 +71,7 @@ function App() {
 
       if(response.status === 429) {
         setError(`Rate limit error, try again after 5seconds!!`);
+        setIsRunning(false);
         return;
       }
       const data = await response.json();
