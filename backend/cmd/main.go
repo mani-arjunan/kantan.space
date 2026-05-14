@@ -85,10 +85,10 @@ func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func executeCode(res http.ResponseWriter, r *http.Request) {
-	// res.Header().Set("Content-Type", "application/json")
-	// res.Header().Set("Access-Control-Allow-Origin", "https://kantan.space")
-	// res.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	// res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	res.Header().Set("Content-Type", "application/json")
+	res.Header().Set("Access-Control-Allow-Origin", "https://kantan.space")
+	res.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == http.MethodOptions {
 		res.WriteHeader(http.StatusOK)
