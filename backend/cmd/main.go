@@ -63,6 +63,7 @@ func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			fmt.Println("Getting Request from IP::::: ", ip)
 
 			if !globalLimiter.Allow() {
+				res.Header().Set("Access-Control-Allow-Origin", "https://kantan.space")
 				res.WriteHeader(http.StatusTooManyRequests)
 				res.Write([]byte("Too many request, try again later."))
 				return
@@ -72,9 +73,10 @@ func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			last, exists := ipLastRequest[ip]
 			fmt.Println(ipLastRequest)
 			fmt.Println(last, exists)
-      // per ip can make 1request per 5seconds 
+      // per ip can make 1request per 5seconds
 			if exists && time.Since(last) < 5*time.Second {
 				ipMu.Unlock()
+				res.Header().Set("Access-Control-Allow-Origin", "https://kantan.space")
 				res.WriteHeader(http.StatusTooManyRequests)
 				return
 			}
