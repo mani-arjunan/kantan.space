@@ -130,7 +130,7 @@ func main() {
 	mux.HandleFunc("/health", healthCheck)
 	mux.HandleFunc("/api/execute", rateLimitMiddleware(executeCode))
 
-	port := ":8081"
+	port := ":9091"
 	fmt.Printf("Server running on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, mux))
 }
