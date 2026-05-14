@@ -1,0 +1,15 @@
+FROM debian:bookworm-slim
+
+# Override at build time, e.g. --build-arg KANTAN_ARCH=linux-x86_64
+ARG KANTAN_ARCH=linux-arm64
+
+RUN useradd -m -s /bin/sh sandbox
+
+WORKDIR /app
+
+COPY kantan/bin/kantan-${KANTAN_ARCH} /usr/local/bin/kantan
+RUN chmod +x /usr/local/bin/kantan
+
+USER sandbox
+
+CMD ["sh"]

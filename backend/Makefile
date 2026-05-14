@@ -19,5 +19,5 @@ clean:
 	rm -rf ./bin/* 
 
 deploy:
-	docker build -t rust-code-sandbox -f ./rust-dockerfile .
+	docker build -t kantan-code-sandbox -f ./kantan-dockerfile .
 	make clean && make build-prod

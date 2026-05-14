@@ -3,14 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"rustlings-on-web/internal/executor"
+	"kantan-space/internal/executor"
 	"strings"
 	"sync"
 	"time"
@@ -89,10 +85,10 @@ func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func executeCode(res http.ResponseWriter, r *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "https://rustlings.online")
-	res.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	// res.Header().Set("Content-Type", "application/json")
+	// res.Header().Set("Access-Control-Allow-Origin", "https://kantan.space")
+	// res.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	// res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == http.MethodOptions {
 		res.WriteHeader(http.StatusOK)
@@ -124,105 +120,6 @@ func executeCode(res http.ResponseWriter, r *http.Request) {
 	res.Write(data)
 }
 
-func fetchExercises(res http.ResponseWriter, r *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "https://rustlings.online")
-
-	if r.Method == http.MethodOptions {
-		res.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		res.WriteHeader(http.StatusOK)
-		return
-	}
-	cacheFile := "./rustlings.json"
-
-	if _, err := os.Stat(cacheFile); err == nil {
-		data, err := os.ReadFile(cacheFile)
-		if err != nil {
-			res.WriteHeader(http.StatusInternalServerError)
-			res.Write([]byte("Something's Wrong"))
-			return
-		}
-
-		res.WriteHeader(http.StatusOK)
-		res.Write(data)
-		return
-	}
-	tmpDir, err := os.MkdirTemp("", "rustlings-*")
-
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		res.Write([]byte("Something Wrong"))
-		panic(err)
-	}
-
-	defer os.RemoveAll(tmpDir)
-
-	cmd := exec.Command("rustlings", "init")
-	cmd.Dir = tmpDir
-
-	if err := cmd.Run(); err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		res.Write([]byte("Something Wrong"))
-		panic(err)
-	}
-
-	rustlingExsPath := filepath.Join(tmpDir, "rustlings", "exercises")
-
-	result := make(map[string]map[string]string)
-
-	err = filepath.WalkDir(rustlingExsPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() {
-			return nil
-		}
-
-		relPath, err := filepath.Rel(rustlingExsPath, path)
-		if err != nil {
-			return err
-		}
-
-		parts := strings.Split(relPath, string(os.PathSeparator))
-
-		if len(parts) < 2 {
-			return nil
-		}
-
-		exercise := parts[0]
-		filename := parts[len(parts)-1]
-		content, err := os.ReadFile(path)
-
-		if result[exercise] == nil {
-			result[exercise] = make(map[string]string)
-		}
-
-		result[exercise][filename] = string(content)
-
-		return nil
-	})
-
-	jsonBytes, err := json.MarshalIndent(result, "", "  ")
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		res.Write([]byte("Something Wrong"))
-		panic(err)
-	}
-
-	if err := os.WriteFile(cacheFile, jsonBytes, 0644); err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		res.Write([]byte("Something Wrong"))
-		return
-	}
-
-	fmt.Println(string(jsonBytes))
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(200)
-	res.Write(jsonBytes)
-}
-
 func healthCheck(res http.ResponseWriter, r *http.Request) {
 	res.WriteHeader(http.StatusOK)
 	res.Write([]byte("Sucess"))
@@ -232,7 +129,6 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthCheck)
 	mux.HandleFunc("/api/execute", rateLimitMiddleware(executeCode))
-	mux.HandleFunc("/api/fetch-exercises", fetchExercises)
 
 	port := ":8081"
 	fmt.Printf("Server running on http://localhost%s\n", port)

@@ -1,4 +1,4 @@
-module rustlings-on-web
+module kantan-space
 
 go 1.24.0
 

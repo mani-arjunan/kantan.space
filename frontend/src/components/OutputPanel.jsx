@@ -1,16 +1,18 @@
-export default function OutputPanel({ output, error, isRunning, isSuccess }) {
+export default function OutputPanel({ output, error, isRunning, isSuccess, onRun }) {
   return (
     <div className="output-panel">
       <div className="output-header">
         <h3>Output</h3>
+        <button onClick={onRun} disabled={isRunning} className="btn-run">
+          {isRunning ? 'Running...' : '▶ Run'}
+        </button>
       </div>
 
       <div className="output-content">
-
         {isRunning && (
           <div className="output-loading">
             <div className="spinner"></div>
-            <span>Running code...</span>
+            <span>Running...</span>
           </div>
         )}
 
@@ -27,7 +29,7 @@ export default function OutputPanel({ output, error, isRunning, isSuccess }) {
 
             {error && (
               <div className="output-section">
-                <div className="output-section-title">Compilation/Runtime Error</div>
+                <div className="output-section-title">Error</div>
                 <div className="output-box error">
                   {error || '(empty error)'}
                 </div>
@@ -38,7 +40,7 @@ export default function OutputPanel({ output, error, isRunning, isSuccess }) {
 
         {!isRunning && !output && !error && (
           <div className="output-empty">
-            Click "Run Code" to see the output here
+            Click "Run" to execute your kantan code.
           </div>
         )}
       </div>

@@ -53,26 +53,26 @@ func ExecuteCode(code string) *ExecutionResult {
 	concurrencyFlag <- true
 	defer func() { <-concurrencyFlag }()
 
-	// create a unique rust-code-sandbox-* directory prbably for each request under /tmp directory
-	tmpDir, err := os.MkdirTemp("", "rust-code-sandbox-*")
+	// create a unique kantan-code-sandbox-* directory prbably for each request under /tmp directory
+	tmpDir, err := os.MkdirTemp("", "kantan-code-sandbox-*")
 	if err != nil {
-		fmt.Println("Error while creating tmp/rust-code-sandbox-* directory: %w", err)
+		fmt.Println("Error while creating tmp/kantan-code-sandbox-* directory: %w", err)
 		return fail(fmt.Errorf("Something's wrong"))
 	}
 
 	// remove the tmp directory after returning the function
 	defer os.RemoveAll(tmpDir)
 
-	mainFile := filepath.Join(tmpDir, "main.rs")
+	mainFile := filepath.Join(tmpDir, "main.kn")
 	if err := os.WriteFile(mainFile, []byte(code), 0644); err != nil {
-		fmt.Println("Failed to write the code to main.rs file in tmp directory /tmp/rust-code-sandbox-*: %w", err)
+		fmt.Println("Failed to write the code to main.kn file in tmp directory /tmp/kantan-code-sandbox-*: %w", err)
 		return fail(fmt.Errorf("Something's wrong"))
 	}
 
 	// context with 10 seconds timeout
 	ctx, cancel := context.WithTimeout(context.Background(), executionTimeout)
 	defer cancel()
-  containerName := fmt.Sprintf("rust-sandbox-%d", time.Now().UnixNano())
+  containerName := fmt.Sprintf("kantan-space-%d", time.Now().UnixNano())
 
 	cmd := exec.CommandContext(
 		ctx,
@@ -91,12 +91,12 @@ func ExecuteCode(code string) *ExecutionResult {
                                                  // will be on memory instead of disc so that it will get deleted after the container exits
 		"-v", tmpDir+":/app:rw",
 		"-w", "/app",
-		"rust-code-sandbox",
-		"sh", "-c", "rustc main.rs -O -o main && ./main",
+		"kantan-code-sandbox",
+		"sh", "-c", "kantan main.kn",
 	)
 
-	// kill all the process including sub process(if someone sends a rust code to my shitty executor which
-  // contains child processes rust code)
+	// kill all the process including sub process(if someone sends a kantan code to my shitty executor which
+  // contains child processes kantan code)
   // initially i thought it will delete the docker container itself, but i was wrong
   // the process that go starts it just the docker cli
   // the docker cli is the one with starts the daemon and docker containers
