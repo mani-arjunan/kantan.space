@@ -23,7 +23,7 @@ type ExecuteRequest struct {
 var (
 	ipLastRequest = make(map[string]time.Time)
 	ipMu          sync.Mutex
-	// 10 total requests per minute
+	// 10 total requests per minute for all ip
 	globalLimiter = rate.NewLimiter(rate.Every(time.Minute/10), 10)
 )
 
@@ -67,6 +67,7 @@ func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			last, exists := ipLastRequest[ip]
 			fmt.Println(ipLastRequest)
 			fmt.Println(last, exists)
+      // per ip can make 1request per 5seconds 
 			if exists && time.Since(last) < 5*time.Second {
 				ipMu.Unlock()
 				res.WriteHeader(http.StatusTooManyRequests)
