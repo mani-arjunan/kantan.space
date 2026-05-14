@@ -53,6 +53,11 @@ func getClientIP(r *http.Request) string {
 func rateLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(res http.ResponseWriter, r *http.Request) {
 
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(res, r)
+			return
+		}
+
 		if r.Method == http.MethodPost {
 			ip := getClientIP(r)
 			fmt.Println("Getting Request from IP::::: ", ip)
