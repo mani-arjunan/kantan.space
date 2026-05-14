@@ -113,6 +113,9 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h2>Kantan <span className="app-subtitle">簡単 — a simple language</span></h2>
+        <a href="https://github.com/mani-arjunan/kantan#" target="_blank" rel="noreferrer" className="btn-docs">
+          Docs
+        </a>
       </header>
 
       <div className="app-container">

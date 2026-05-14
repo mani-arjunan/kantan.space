@@ -64,6 +64,23 @@ body {
   letter-spacing: normal;
 }
 
+.btn-docs {
+  margin-left: auto;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-docs:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
 .app-container {
   display: flex;
   flex: 1;
