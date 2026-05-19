@@ -50,8 +50,8 @@ export class KantanLanguageService {
           ],
 
           multilineComment: [
-            [/[^\}]+/, 'comment'],
-            [/\}/, 'comment', '@pop'],
+            [/.*\}/, 'comment', '@pop'],
+            [/.*$/, 'comment'],
           ],
         },
       }
