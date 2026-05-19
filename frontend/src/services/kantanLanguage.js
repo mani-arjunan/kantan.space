@@ -19,38 +19,35 @@ export class KantanLanguageService {
       {
         tokenizer: {
           root: [
+
             [/notes:\s*(?!\{).*$/, 'comment'],
 
-            [/notes:\s*\{/, 'comment', '@multilineComment'],
+            [/notes:\s*\{/, {
+              token: 'comment',
+              next: '@multilineComment'
+            }],
 
-            [
-              /\b(print|if|repeat|times|is)\b/,
-              'keyword',
-            ],
+            [/\b(print|if|repeat|times|is)\b/, 'keyword'],
 
             [
               /\[(is equal to|is not equal to|is greater than|is less than|is greater than equal to|is less than equal to)\]/,
               'operator',
             ],
 
-            [
-              /"[^"]*"/,
-              'string',
-            ],
+            [/"[^"]*"/, 'string'],
 
-            [
-              /\b\d+\b/,
-              'number',
-            ],
+            [/\b\d+\b/, 'number'],
 
-            [
-              /[{}]/,
-              'delimiter',
-            ],
+            [/[{}]/, 'delimiter'],
           ],
 
           multilineComment: [
-            [/.*\}/, 'comment', '@pop'],
+
+            [/^\s*\}$/, {
+              token: 'comment',
+              next: '@pop'
+            }],
+
             [/.*$/, 'comment'],
           ],
         },
