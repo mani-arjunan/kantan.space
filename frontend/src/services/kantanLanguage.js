@@ -19,6 +19,10 @@ export class KantanLanguageService {
       {
         tokenizer: {
           root: [
+            [/notes:\s*(?!\{).*$/, 'comment'],
+
+            [/notes:\s*\{/, 'comment', '@multilineComment'],
+
             [
               /\b(print|if|repeat|times|is)\b/,
               'keyword',
@@ -44,6 +48,11 @@ export class KantanLanguageService {
               'delimiter',
             ],
           ],
+
+          multilineComment: [
+            [/\}/, 'comment', '@pop'],
+            [/./, 'comment'],
+          ],
         },
       }
     );
@@ -55,6 +64,12 @@ export class KantanLanguageService {
       inherit: true,
 
       rules: [
+
+        {
+          token: 'comment',
+          foreground: '6A9955',
+          fontStyle: 'italic',
+        },
 
         {
           token: 'keyword',
@@ -201,6 +216,26 @@ export class KantanLanguageService {
       },
 
       {
+        label: 'notes',
+        kind: this.monaco.languages.CompletionItemKind.Keyword,
+        insertText: 'notes: $0',
+        insertTextRules:
+          this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        documentation: 'Single-line comment. Use notes: { } for multi-line.',
+        range,
+      },
+
+      {
+        label: 'notes: { }',
+        kind: this.monaco.languages.CompletionItemKind.Keyword,
+        insertText: 'notes: {\n\t$0\n}',
+        insertTextRules:
+          this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        documentation: 'Multi-line comment block.',
+        range,
+      },
+
+      {
         label: '[is equal to]',
         kind:
           this.monaco.languages
@@ -268,6 +303,8 @@ export class KantanLanguageService {
         'Used after repeat.',
       is:
         'Assigning a value to the variable.',
+      notes:
+        'Comment. Single-line: `notes: your comment`. Multi-line: `notes: { ... }`.',
     };
 
     return docs[word];
@@ -278,33 +315,33 @@ export class KantanLanguageService {
     const lines = code.split('\n');
     const markers = [];
     let openBraces = 0;
+    let inMultilineComment = false;
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       const trimmed = line.trim();
 
       if (trimmed.length === 0) return;
 
+      if (inMultilineComment) {
+        if (trimmed === '}') inMultilineComment = false;
+        return;
+      }
+
+      if (/^notes:\s*(?!\{)/.test(trimmed)) return;
+
+      if (/^notes:\s*\{/.test(trimmed)) {
+        const afterBrace = trimmed.replace(/^notes:\s*\{/, '');
+        if (!afterBrace.includes('}')) inMultilineComment = true;
+        return;
+      }
+
       if (trimmed.endsWith('{')) {
         openBraces++;
+        return;
       }
 
       if (trimmed === '}') {
         openBraces--;
-      }
-
-      if (
-        !trimmed.endsWith('{') &&
-        trimmed !== '}'
-      ) {
-        markers.push({
-          severity: this.monaco.MarkerSeverity.Error,
-          startLineNumber: index + 1,
-          startColumn: line.length,
-          endLineNumber: index + 1,
-          endColumn: line.length + 1,
-          message: "Must end with '.'",
-          source: 'kantan',
-        });
       }
     });
 
@@ -314,15 +351,12 @@ export class KantanLanguageService {
         startLineNumber: lines.length,
         startColumn: 1,
         endLineNumber: lines.length,
+        endColumn: 1,
         message: "Missing closing '}'",
         source: 'kantan',
       });
     }
 
-    this.monaco.editor.setModelMarkers(
-      model,
-      'kantan',
-      markers
-    );
+    this.monaco.editor.setModelMarkers(model, 'kantan', markers);
   }
 }
