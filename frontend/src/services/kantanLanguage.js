@@ -293,7 +293,6 @@ export class KantanLanguageService {
       }
 
       if (
-        !trimmed.endsWith('.') &&
         !trimmed.endsWith('{') &&
         trimmed !== '}'
       ) {
@@ -315,7 +314,6 @@ export class KantanLanguageService {
         startLineNumber: lines.length,
         startColumn: 1,
         endLineNumber: lines.length,
-        endColumn: 1,
         message: "Missing closing '}'",
         source: 'kantan',
       });
