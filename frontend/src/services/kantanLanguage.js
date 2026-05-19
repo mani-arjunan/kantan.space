@@ -17,15 +17,15 @@ export class KantanLanguageService {
     this.monaco.languages.setMonarchTokensProvider(
       'kantan',
       {
+        defaultToken: '',
+        tokenPostfix: '.kantan',
+
         tokenizer: {
           root: [
 
-            [/notes:\s*(?!\{).*$/, 'comment'],
+            [/notes:\s*\{/, 'comment', '@multilineComment'],
 
-            [/notes:\s*\{/, {
-              token: 'comment',
-              next: '@multilineComment'
-            }],
+            [/notes:.*/, 'comment'],
 
             [/\b(print|if|repeat|times|is)\b/, 'keyword'],
 
@@ -43,10 +43,7 @@ export class KantanLanguageService {
 
           multilineComment: [
 
-            [/^\s*\}$/, {
-              token: 'comment',
-              next: '@pop'
-            }],
+            [/^\s*\}/, 'comment', '@pop'],
 
             [/.*$/, 'comment'],
           ],
@@ -64,6 +61,12 @@ export class KantanLanguageService {
 
         {
           token: 'comment',
+          foreground: '6A9955',
+          fontStyle: 'italic',
+        },
+
+        {
+          token: 'comment.*',
           foreground: '6A9955',
           fontStyle: 'italic',
         },
