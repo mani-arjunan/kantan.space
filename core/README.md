@@ -161,12 +161,22 @@ Assign("a", Number(10))
 
 This step is the core, basically executes the AST using `rust` eval.
 
-# Running Kantan
+# Installation & Running
 
-Checkout the bin folder to run the binary directly
+Either build it from source using `make build-all` and do
+
 ```bash
 ./bin/{YOUR_OS_ARCHITECTURE} ./example.kn(or any other files)
 ```
+
+or for Mac users use 
+
+```bash
+brew tap mani/kantan https://git.mh-home.space/mani/homebrew-kantan.git
+brew trust mani/kantan
+brew install kantan
+```
+and then do `kantan YOUR_FILE.kn`
 
 # Phase2(if am interested)
 
